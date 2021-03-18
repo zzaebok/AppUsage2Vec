@@ -32,6 +32,6 @@ class AppUsage2VecDataset(Dataset):
         
         # time vector one of 7 dim / one of 24 dim
         time_vector[list(map(int, time.split('_')))] = 1
-        return torch.LongTensor([user]), time_vector, torch.LongTensor(app_seq), torch.Tensor(time_seq), torch.LongTensor([target])
+        return (torch.LongTensor([user]), time_vector, torch.LongTensor(app_seq), torch.Tensor(time_seq)), torch.LongTensor([target])
         
         
