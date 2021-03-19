@@ -29,14 +29,14 @@ If you want to run the code by using docker, follow instructions below.
 
 * Docker build
 
-```cmd
+```bash
 docker build -t appusage2vec .
 docker run --rm -it --gpus all -p 8888:8888 -v {your_path}/AppUsage2Vec:/AppUsage2Vec appusage2vec /bin/bash
 ```
 
 * Jupyter lab in container
 
-```cmd
+```bash
 jupyter lab --allow-root --ip=0.0.0.0
 ```
 And copy the url in the terminal and paste it on the web browser to use jupyterlab in the container.
@@ -65,7 +65,9 @@ If you want to change sequence length, change `seq_length` in 4th cell.
 
 ## How to run
 
-```
+After extracting dataset and preprocessing,
+
+```bash
 python main.py
 ```
 
