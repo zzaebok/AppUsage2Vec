@@ -116,7 +116,7 @@ def main():
     plt.xlabel('epoch')
     plt.ylabel('accuracy@k')
     plt.legend(loc='upper left')
-    plt.xticks(np.arange(args.epoch))
+    plt.xticks(np.arange(args.epoch+1))
     plt.ylim(0, 1)
     fig.savefig('result.png')
     
