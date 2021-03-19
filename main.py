@@ -1,14 +1,12 @@
 import os
 import argparse
-import ast
 import random
-
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 import torch
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torch.optim as optim
-
 
 from AppUsage2VecDataset import AppUsage2VecDataset
 from AppUsage2Vec import AppUsage2Vec
@@ -16,14 +14,14 @@ from AppUsage2Vec import AppUsage2Vec
 def parse_args():
     parser = argparse.ArgumentParser(description="Pytorch implementation of AppUsage2Vec model")
     
-    parser.add_argument('--epoch', type=int, default=20, help="The number of epochs")
+    parser.add_argument('--epoch', type=int, default=10, help="The number of epochs")
     parser.add_argument('--batch_size', type=int, default=512, help="The size of batch")
     parser.add_argument('--dim', type=int, default=64, help="The embedding size of users and apps")
     parser.add_argument('--seq_length', type=int, default=4, help="The length of previously used app sequence")
     parser.add_argument('--num_layers', type=int, default=2, help="Number of layers in DNN")
     parser.add_argument('--alpha', type=float, default=0.1, help="Discount oefficient for loss function")
     parser.add_argument('--topk', type=float, default=5, help="Topk for loss function")
-    parser.add_argument('--lr', type=float, default=0.01, help="Learning rate for optimizer")
+    parser.add_argument('--lr', type=float, default=0.001, help="Learning rate for optimizer")
     parser.add_argument('--seed', type=int, default=2021, help="Random seed")
     
     return parser.parse_args()
@@ -59,9 +57,10 @@ def main():
     # train & evaluation
     total_loss = 0
     itr = 1
-    p_itr = 100
+    p_itr = 500
     best_acc = 0
     Ks = [1,5,10]
+    acc_history = [[0,0,0]]
     best_acc = 0
     
     for e in range(args.epoch):
@@ -101,6 +100,7 @@ def main():
                     correct = torch.sum(torch.eq(torch.topk(scores, dim=1, k=k).indices, targets)).item()
                     corrects[idx] += correct
         accs = [x/len(test_dataset) for x in corrects]
+        acc_history.append(accs)
         print("[EVALUATION] Epoch: {} - Acc: {:.5f} / {:.5f} / {:.5f}".format(e+1, accs[0], accs[1], accs[2]))
         
         if accs[2] > best_acc:
@@ -108,8 +108,17 @@ def main():
     
     print("BEST ACC@10: {}".format(best_acc))
                 
-    
     # visualization
+    fig = plt.figure()
+    acc_history = list(map(list, zip(*acc_history)))
+    for idx, k in enumerate(Ks):
+        plt.plot(acc_history[idx], label='acc@{}'.format(k))
+    plt.xlabel('epoch')
+    plt.ylabel('accuracy@k')
+    plt.legend(loc='upper left')
+    plt.xticks(np.arange(args.epoch))
+    plt.ylim(0, 1)
+    fig.savefig('result.png')
     
 
 if __name__ == "__main__":

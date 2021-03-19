@@ -57,7 +57,7 @@ class AppUsage2Vec(nn.Module):
         combination = torch.cat([combination, time_vecs], dim=1) # [batch_size, dim+31]
         
         # softmax / Eq.(4)
-        scores = F.softmax(self.classifier(combination), dim=1)  # [batch_size, n_apps]
+        scores = self.classifier(combination)  # [batch_size, n_apps]
         
         if mode == 'predict':
             return scores  # [batch_size, n_apps]
@@ -65,9 +65,9 @@ class AppUsage2Vec(nn.Module):
             preds = torch.topk(scores, dim=1, k=self.k).indices  # [batch_size, k]
             indicator = torch.sum(torch.eq(preds, targets), dim=1)  # [batch_size]
             coefficient = torch.pow(torch.Tensor([self.alpha] * indicator.size(0)).to(self.device), indicator) # [batch_size]
-            p = scores[torch.arange(scores.size(0)), targets.view(-1)] # [batch_size]
-            plogp = p * torch.log(p) # [batch_size]
-            loss = (-1.0) * torch.mean(coefficient * plogp)
+
+            loss = F.cross_entropy(scores, targets.view(-1), reduction='none')
+            loss = torch.mean(torch.mul(coefficient, loss))
             return loss
             
         
